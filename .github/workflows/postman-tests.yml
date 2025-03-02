@@ -9,7 +9,7 @@ jobs:
     environment: staging
 
     steps:
-      - name: Check out repo
+      - name: Checkout repo
         uses: actions/checkout@v4
 
       - name: Install newman
@@ -18,14 +18,14 @@ jobs:
 
       - name: Debug - Echo BASEURL and TOKEN
         run: |
-          echo "BASEURL from env: ${{ env.BASEURL }}"
+          echo "BASEURL from env: ${{ vars.BASEURL }}"
           echo "TOKEN from secrets: ${{ secrets.TOKEN }}"
 
       - name: Run Postman Collection
         run: |
           newman run ./tests/ContactList1.json \
             --reporters cli,htmlextra \
-            --env-var "baseUrl=${{ env.BASEURL }}" \
+            --env-var "baseUrl=${{ vars.BASEURL }}" \
             --env-var "token=${{ secrets.TOKEN }}"
           env:
             BASEURL: ${{ env.BASEURL }}
