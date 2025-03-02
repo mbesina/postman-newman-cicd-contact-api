@@ -16,20 +16,12 @@ jobs:
         run: |
           npm install -g newman newman-reporter-htmlextra
 
-      - name: Debug - Echo BASEURL and TOKEN
-        run: |
-          echo "BASEURL from env: ${{ vars.BASEURL }}"
-          echo "TOKEN from secrets: ${{ secrets.TOKEN }}"
-
       - name: Run Postman Collection
         run: |
           newman run ./tests/ContactList1.json \
             --reporters cli,htmlextra \
             --env-var "baseUrl=${{ vars.BASEURL }}" \
             --env-var "token=${{ secrets.TOKEN }}"
-          env:
-            BASEURL: ${{ env.BASEURL }}
-            TOKEN: ${{ secrets.TOKEN }}
 
       - name: Upload Newman Report Artifact
         uses: actions/upload-artifact@v4
