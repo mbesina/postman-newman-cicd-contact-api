@@ -14,7 +14,7 @@ This project provides an approach to testing a Contact List API. It includes:
 
 ## Contents
 
-* `ContactList.json`: Postman collection containing API test requests.
+* `ContactList1.json`: Postman collection containing API test requests.
 
 ## Setup
 
