@@ -16,8 +16,12 @@ jobs:
         run: |
           npm install -g newman newman-reporter-htmlextra
 
+      - name: Debug - Echo BASEURL and TOKEN
+        run: |
+          echo "BASEURL from env: ${{ env.BASEURL }}"
+          echo "TOKEN from secrets: ${{ secrets.TOKEN }}"
+
       - name: Run Postman Collection
-        working-directory: .
         run: |
           newman run ./tests/ContactList1.json \
             --reporters cli,htmlextra \
