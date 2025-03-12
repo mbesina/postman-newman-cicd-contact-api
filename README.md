@@ -20,4 +20,4 @@ This project provides an approach to testing a Contact List API. It includes:
 
 1. **Clone the repository:**
    ```bash
-   git clone [https://github.com/your-username/contact-list-api-testing.git](https://www.google.com/search?q=https://github.com/your-username/contact-list-api-testing.git)
+   git clone https://github.com/your-username/contact-list-api-testing.git
