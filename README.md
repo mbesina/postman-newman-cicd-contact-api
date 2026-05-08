@@ -1,6 +1,6 @@
 # Contact List API Testing
 
-This repository demonstrates API testing using Postman, Newman, and CI/CD integration with GitHub Actions.
+API test automation framework using Postman collections, Newman, and GitHub Actions CI/CD pipelines.
 
 ## Project Overview
 
