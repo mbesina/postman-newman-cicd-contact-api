@@ -67,6 +67,8 @@ GitHub Actions runs the same command used locally:
 ```bash
 npm test
 ```
+<img width="1311" height="625" alt="image" src="https://github.com/user-attachments/assets/2db3c6c3-2f9b-45fb-9d10-59657ef406ce" />
+
 
 The workflow installs dependencies with `npm ci` and runs the Newman collection. No GitHub secret token is required because the collection generates its own bearer token during the run.
 
@@ -84,6 +86,8 @@ Requests: 5
 Assertions: 5
 Failures: 0
 ```
+
+<img width="1241" height="662" alt="image" src="https://github.com/user-attachments/assets/cbbd72f4-31e4-46d2-972e-ceb7564a1cb8" />
 
 ## Author
 
