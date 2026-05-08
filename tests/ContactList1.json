@@ -11,20 +11,44 @@
       "name": "Add Contact",
       "event": [
         {
-          "listen": "test",
+          "listen": "prerequest",
           "script": {
             "exec": [
-              "pm.test(\"Testing Status Code\",  () => {\r",
-              "    pm.response.to.have.status(201)\r",
-              "})\r",
-              "\r",
-              "pm.test(\"Testing Status Code\",  () => {\r",
-              "    const responseJson = pm.response.json();\r",
-              "    pm.expect(responseJson.email).to.eql(\"jdoe@fake.com\")\r",
-              "})\r",
-              "\r",
-              "pm.test(\"Response time is less than 2000ms\", function () {\r",
-              "    pm.expect(pm.response.responseTime).to.be.below(2000);\r",
+              "const baseUrl = pm.environment.get('baseUrl');",
+              "const timestamp = Date.now();",
+              "const email = `local.runner.${timestamp}@example.com`;",
+              "const contactEmail = `contact.${timestamp}@example.com`;",
+              "const password = pm.environment.get('password');",
+              "",
+              "pm.environment.set('email', email);",
+              "pm.environment.set('contactEmail', contactEmail);",
+              "",
+              "pm.sendRequest({",
+              "    url: `${baseUrl}/users`,",
+              "    method: 'POST',",
+              "    header: {",
+              "        'Content-Type': 'application/json'",
+              "    },",
+              "    body: {",
+              "        mode: 'raw',",
+              "        raw: JSON.stringify({",
+              "            firstName: pm.environment.get('firstName'),",
+              "            lastName: pm.environment.get('lastName'),",
+              "            email,",
+              "            password",
+              "        })",
+              "    }",
+              "}, (error, response) => {",
+              "    if (error) {",
+              "        throw new Error(`Unable to create test user: ${error.message}`);",
+              "    }",
+              "",
+              "    if (response.code !== 201) {",
+              "        throw new Error(`Unable to create test user. Expected 201 but got ${response.code}: ${response.text()}`);",
+              "    }",
+              "",
+              "    const responseJson = response.json();",
+              "    pm.environment.set('token', responseJson.token);",
               "});"
             ],
             "type": "text/javascript",
@@ -32,9 +56,24 @@
           }
         },
         {
-          "listen": "prerequest",
+          "listen": "test",
           "script": {
-            "exec": [""],
+            "exec": [
+              "pm.test('status code is 201 Created', () => {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test('created contact uses requested email', () => {",
+              "    const responseJson = pm.response.json();",
+              "    pm.expect(responseJson.email).to.eql(pm.environment.get('contactEmail'));",
+              "    pm.expect(responseJson._id).to.be.a('string').and.not.empty;",
+              "    pm.environment.set('contactId', responseJson._id);",
+              "});",
+              "",
+              "pm.test('response time is less than 2000ms', () => {",
+              "    pm.expect(pm.response.responseTime).to.be.below(2000);",
+              "});"
+            ],
             "type": "text/javascript",
             "packages": {}
           }
@@ -52,10 +91,15 @@
           ]
         },
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"firstName\": \"John\",\r\n    \"lastName\": \"Doe\",\r\n    \"birthdate\": \"1970-01-01\",\r\n    \"email\": \"jdoe@fake.com\",\r\n    \"phone\": \"8005555555\",\r\n    \"street1\": \"1 Main St.\",\r\n    \"street2\": \"Apartment A\",\r\n    \"city\": \"Anytown\",\r\n    \"stateProvince\": \"KS\",\r\n    \"postalCode\": \"12345\",\r\n    \"country\": \"USA\"\r\n}",
+          "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"birthdate\": \"1970-01-01\",\n  \"email\": \"{{contactEmail}}\",\n  \"phone\": \"8005555555\",\n  \"street1\": \"1 Main St.\",\n  \"street2\": \"Apartment A\",\n  \"city\": \"Anytown\",\n  \"stateProvince\": \"KS\",\n  \"postalCode\": \"12345\",\n  \"country\": \"USA\"\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -64,14 +108,61 @@
         },
         "url": {
           "raw": "{{baseUrl}}/contacts",
-          "host": ["{{baseUrl}}"],
-          "path": ["contacts"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "contacts"
+          ]
         }
       },
       "response": []
     },
     {
       "name": "Get Contact List",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('status code is 200 OK', () => {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('created contact is returned in the list', () => {",
+              "    const responseJson = pm.response.json();",
+              "    const contact = responseJson.find((item) => item._id === pm.environment.get('contactId'));",
+              "    pm.expect(contact).to.exist;",
+              "    pm.expect(contact.email).to.eql(pm.environment.get('contactEmail'));",
+              "});",
+              "",
+              "const baseUrl = pm.environment.get('baseUrl');",
+              "const token = pm.environment.get('token');",
+              "const contactId = pm.environment.get('contactId');",
+              "",
+              "if (contactId) {",
+              "    pm.sendRequest({",
+              "        url: `${baseUrl}/contacts/${contactId}`,",
+              "        method: 'DELETE',",
+              "        header: {",
+              "            Authorization: `Bearer ${token}`",
+              "        }",
+              "    });",
+              "}",
+              "",
+              "pm.sendRequest({",
+              "    url: `${baseUrl}/users/me`,",
+              "    method: 'DELETE',",
+              "    header: {",
+              "        Authorization: `Bearer ${token}`",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript",
+            "packages": {}
+          }
+        }
+      ],
       "request": {
         "auth": {
           "type": "bearer",
@@ -87,8 +178,12 @@
         "header": [],
         "url": {
           "raw": "{{baseUrl}}/contacts",
-          "host": ["{{baseUrl}}"],
-          "path": ["contacts"]
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "contacts"
+          ]
         }
       },
       "response": []
