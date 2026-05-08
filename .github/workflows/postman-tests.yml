@@ -12,19 +12,14 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Install newman
-        run: |
-          npm install -g newman newman-reporter-htmlextra
-
-      - name: Run Postman Collection
-        run: |
-          newman run ./tests/ContactList1.json \
-            --reporters cli,htmlextra \
-            --env-var "baseUrl=${{ vars.BASEURL }}" \
-            --env-var "token=${{ secrets.TOKEN }}"
-
-      - name: Upload Newman Report Artifact
-        uses: actions/upload-artifact@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          name: postman-report
-          path: newman
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Postman collection
+        run: npm test

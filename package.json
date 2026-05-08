@@ -1,0 +1,13 @@
+{
+  "name": "postman-newman-cicd-contact-api",
+  "version": "1.0.0",
+  "description": "Postman and Newman API test automation for the Contact List API.",
+  "private": true,
+  "scripts": {
+    "test": "npm run test:api",
+    "test:api": "newman run tests/ContactList1.json --environment environments/local.postman_environment.json --reporters cli"
+  },
+  "devDependencies": {
+    "newman": "^6.2.2"
+  }
+}
